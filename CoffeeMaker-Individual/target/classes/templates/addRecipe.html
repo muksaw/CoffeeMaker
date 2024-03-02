@@ -1,0 +1,72 @@
+<html>
+<!-- The head of this page -->
+<head>
+<title>Create a Recipe</title>
+</head>
+
+<!-- The body of this page -->
+<body>
+	<!-- The main header of this page -->
+	<h1>Create a Recipe</h1>
+
+	<!-- Recipe Name Textbox -->
+	<form>
+		<label for="textbox">Enter Recipe Name:</label><br>
+		<input
+			type="text" id="textbox" name="textbox"><br>
+	</form>
+
+	<!-- Price Textbox -->
+	<form>
+		<label for="numberbox">Enter Recipe Price:</label><br> <input
+			type="number" id="numberbox" name="numberbox"><br>
+	</form>
+
+	<!-- Ingredient List -->
+	<label for="Ingredient">Choose an Ingredient:</label>
+	<select name="Ingredient" id="Ingredient">
+		<option value="- Select -">- Select -</option>
+		<option value="Coffee">Coffee</option>
+		<option value="Milk">Milk</option>
+		<option value="Chocolate">Chocolate</option>
+		<option value="Sugar">Sugar</option>
+		<option value="Peppermint">Peppermint</option>
+		<option value="Caramel">Caramel</option>
+	</select>
+	<br>
+	<button onclick="addIngredient()">Add Ingredient</button>
+
+	<!-- Ingredient Table -->
+	<h2>Recipe</h2>
+	<table id="recipeTable">
+		<!-- Column Types -->
+		<tr>
+			<th>Ingredient</th>
+			<th>Amount</th>
+		</tr>
+	</table>
+
+	<!-- Submit button to create Recipe -->
+	<form>
+		<input type="submit" value="Submit">
+	</form>
+	
+	<!--Scripts-->
+	<script>
+      function addIngredient() {
+        var selectedIngredient = document.getElementById("Ingredient").value;
+        if (selectedIngredient !== "- Select -") {
+          var table = document.getElementById("recipeTable");
+          var row = table.insertRow(-1);
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          cell1.innerHTML = selectedIngredient;
+          cell2.innerHTML = '<input type="number" value="0" name="' + selectedIngredient + '">';
+        } else {
+          alert("Please select an ingredient.");
+        }
+      }
+    </script>
+    
+</body>
+</html>

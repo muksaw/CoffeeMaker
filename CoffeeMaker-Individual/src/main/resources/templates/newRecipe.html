@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<!--- Header information about the page -->
+<head>
+<title>Create a Recipe</title>
+</head>
+
+<!-- Body information for this page -->
+<body>
+	<div layout:fragment="content">
+		<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+		<script>
+			/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+			/*<![CDATA[*/ 
+			var app = angular.module('myApp', []);
+			app.controller('populateCtrl', function($scope, $http, $q) {				
+				// Initialize Ingredients Dropdown
+				$http.get("/api/v1/inventory").then(function(response) {
+					$scope.ingredients = response.data.ingredients;
+					console.log($scope.ingredients);
+				});
+				
+				// Array to store selected Ingredients
+				$scope.recipeIngredients = [];
+
+				// Adds an Ingredient to an Ingredient Table for the Recipe
+				$scope.addToRecipe = function() {
+					// Check if any ingredients are checked
+					var ingredientsChecked = $scope.ingredients.some(function(ingredient) {
+				        return ingredient.checked;
+				    });
+				    if (!ingredientsChecked) {
+				        alert('Please select at least one ingredient to add to the recipe.');
+				        return;
+				    }
+					
+				    // Iterate over all ingredients
+				    let duplicateIngredients = false;
+				    angular.forEach($scope.ingredients, function(ingredient) {
+				        // Check if the ingredient is checked
+				        if (ingredient.checked) {
+				            // Check if the ingredient is already in the recipeIngredients array
+				            var duplicateIngredient = $scope.recipeIngredients.some(function(recipeIngredient) {
+				                return recipeIngredient.name === ingredient.name;
+				            });
+				            // If the ingredient is not already in the recipeIngredients array, add it
+				            if (!duplicateIngredient) {
+				                $scope.recipeIngredients.push({
+				                    name: ingredient.name,
+				                    amount: 1,
+				                    checked: false
+				                });
+				            } else {
+				            	duplicateIngredients = true;
+				            }
+				        }
+				        
+				        // Uncheck each ingredient
+				        ingredient.checked = false;
+				    });
+				    
+				    // Print alert if duplicate ingredients
+				    if (duplicateIngredients) {
+				    	alert('Duplicate Ingredients were not added.');
+				    }
+				};
+
+				
+				// Removes Ingredient(s) from the Recipe
+				$scope.removeFromRecipe = function() {
+					// Display error if no Ingredients are selected
+					var ingredientsSelected = $scope.recipeIngredients.some(function(ingredient) {
+						return ingredient.checked
+					});
+					if (!ingredientsSelected) {
+						alert('Please select at least one ingredient to remove.');
+						return;
+					}
+					
+					// Filter out checked Ingredients
+					$scope.recipeIngredients = $scope.recipeIngredients.filter(function(ingredient) {
+						return !ingredient.checked;
+					})
+				};
+				
+				// Submit Recipe for creation
+				$scope.submit = function() {
+					// Check if name and price are filled
+					if (!$scope.recipeName || !$scope.recipePrice) {
+						alert('Please fill in the Recipe Name and Recipe Price. If you have, please ensure that the price is a positive integer.');
+						return;
+					}
+					
+					// Check if there are Ingredients in the recipe
+					if (!$scope.recipeIngredients || $scope.recipeIngredients.length === 0) {
+						alert('Please add Ingredients to the Recipe');
+						return;
+					}
+					
+				    // Check if each ingredient's amount is not null
+				    for (var i = 0; i < $scope.recipeIngredients.length; i++) {
+				        var ingredient = $scope.recipeIngredients[i];
+				        if (!ingredient.amount) {
+				            alert('Please provide the proper amount for ingredient ' + ingredient.name);
+				            return;
+				        }
+				    }
+					
+					// Create Recipe
+					$scope.recipe = {
+							name: $scope.recipeName,
+							price: $scope.recipePrice,
+							ingredients: $scope.recipeIngredients
+					}
+					
+					// Post call to create Recipe in database
+					$http.post("api/v1/recipes", $scope.recipe).then(
+						function(success) {
+							$scope.success = true;
+							alert('Recipe created successfully.');
+							window.location.reload();
+						}, function(rejection) {
+							alert('Error while adding Recipe.');
+						}
+					);
+				};
+			});
+			
+			/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+			/*]]>*/
+		</script>
+
+		<div ng-app="myApp" ng-controller="populateCtrl">
+
+			<!--- Various HTML elements, with extra tags telling Angular how to work with them, go here -->
+			
+			<!-- Header for this page -->
+			<h1>Create a Recipe</h1>
+			
+			<!-- Recipe name textbox -->
+			<form>
+				<label for="textbox">Enter Recipe Name:</label><br>
+				<input type="text" ng-model="recipeName"><br>
+			</form>
+			
+			<!-- Price Textbox -->
+			<form>
+				<label for="numberbox">Enter Recipe Price:</label><br>
+				<input type="number" ng-model="recipePrice" min ="0" ng-pattern="/^\d+$/" step="1"><br>
+			</form><br>
+			
+			<!-- Ingredient Table -->
+			<label for="Ingredient">Select Ingredients:</label>
+			
+			<table id="ingredientTable" style="border: 1px solid black;">
+				<!-- Columns -->
+				<tr>
+                	<th style="border: 1px solid black;">Ingredient</th>
+                	<th style="border: 1px solid black;">Select</th>
+            	</tr>
+            	<!-- Ingredients Available -->
+            	<tr ng-repeat="ingredient in ingredients">
+            		<td style="border: 1px solid black;">{{ ingredient.name }}</td>
+            		<td style="border: 1px solid black;"><input type="checkbox" ng-model="ingredient.checked"></td>
+            	</tr>
+			</table><br>
+			<button ng-click="addToRecipe()">Add Ingredient(s)</button>
+			
+			<!-- Ingredient Table -->
+			<h2>Recipe</h2>
+			<table id="recipeTable" style="border: 1px solid black;">
+				<!-- Columns -->
+				<tr>
+                	<th style="border: 1px solid black;">Ingredient</th>
+                	<th style="border: 1px solid black;">Amount</th>
+                	<th style="border: 1px solid black;">Select</th>
+            	</tr>
+            	<!-- Ingredients in Recipe -->
+            	<tr ng-repeat="ingredient in recipeIngredients">
+            		<td style="border: 1px solid black;">{{ ingredient.name }}</td>
+            		<td style="border: 1px solid black;"><input type="number" ng-model="ingredient.amount" value="1" min="1" ng-pattern="/^\d+$/" step="1"></td>
+            		<td style="border: 1px solid black;"><input type="checkbox" ng-model="ingredient.checked"></td>
+            	</tr>
+			</table><br>
+			
+			<!-- Remove Ingredients Button -->
+			<button ng-click="removeFromRecipe()">Remove Ingredient(s)</button><br><br>
+			
+			<!-- Submit Button -->
+			<button ng-click="submit()">Submit</button><br><br>
+			
+			<!-- Home Hyperlink -->
+			<a href="/index">Home</a>
+		</div>
+	</div>
+</body>
+</html>
