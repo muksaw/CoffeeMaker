@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order History</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #FFF0E5;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .order-history-header {
+    text-align: center;
+    color: #A52A2A;
+    margin-bottom: 20px;
+  }
+
+  .order-history-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
+  }
+
+  .order-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .order-item:last-child {
+    border-bottom: none;
+  }
+
+  .order-detail {
+    color: #333;
+  }
+
+  .order-status {
+    color: #4CAF50; /* Green color for fulfilled orders */
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="order-history-header">
+  <h1>Order History</h1>
+</div>
+
+<div class="order-history-section">
+  <!-- Dummy data for order history -->
+  <div class="order-item">
+    <span class="order-detail">Order #10293</span>
+    <span class="order-status">Fulfilled</span>
+  </div>
+  <!-- Repeat for each fulfilled order -->
+</div>
+
+<br /> <a href="/index">Home</a>
+
+</body>
+</html>

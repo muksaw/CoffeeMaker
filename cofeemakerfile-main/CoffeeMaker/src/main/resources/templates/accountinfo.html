@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f2; 
+  margin: 0;
+  padding: 20px;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between; 
+  margin-bottom: 20px;
+}
+
+.orders-header h2:first-child {
+  flex-grow: 1;
+  text-align: center; 
+}
+
+.orders-header h2:last-child {
+  flex-grow: 0;
+  text-align: right; 
+  margin-right: 20px; 
+  font-size: 1.5em;
+  color: #A52A2A; 
+}
+
+.orders-section {
+  background-color: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-id {
+  font-size: 18px;
+  color: #333;
+}
+
+.status {
+  font-size: 18px;
+  color: #4CAF50; 
+}
+
+.status.in-progress {
+  color: #FF9800;
+}
+
+.back-button {
+  display: inline-block;
+  margin-top: 20px;
+  color: #2196F3;
+  cursor: pointer;
+  text-decoration: underline; 
+}
+.pick-up-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+<br /><br /> <a href="/index">Home</a>
+</body>
+</html>

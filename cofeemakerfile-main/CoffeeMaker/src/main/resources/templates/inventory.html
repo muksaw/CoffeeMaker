@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<HTML xmlns:th="http://www.thymeleaf.org">
+
+<title>Add Inventory</title>
+
+<style>
+  h1 {text-align: center;}
+  h2 {text-align: center;}
+  p {text-align: center;}
+  div {text-align: center;}
+  table, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  .center {
+	  margin-left: auto;
+      margin-right: auto;
+  }
+  .ingredients-td {
+    width: 60%;
+  }
+  .stock-td {
+    width: 20%;
+  }
+  .red-text {
+        color: red;
+  }
+
+  .green-text {
+    color: green;
+  }
+  button {text-align: center;}
+
+</style>
+
+<!-- Body of the page -->
+<body ng-app="inventory" ng-controller="controller">
+  <script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script> <!-- import angular--->
+	<script>
+		/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+		/*<![CDATA[*/ 
+		var app = angular.module('inventory', []);
+		app.controller('controller', function($scope, $http, $q) {
+	    //fetch all ingredient names in inventory
+	    console.log("hello");
+      $http.get("/api/v1/inventory").then(function(response) {
+        $scope.ingredients = response.data.ingredientList;
+        for (let i = 0; i < $scope.ingredients.length; i++) {
+          $scope.ingredients[i].stockAmount = 0;
+        }
+        console.log("wawa");
+        console.log($scope.ingredients);
+      });
+      
+      $scope.submit = function() {
+        $scope.changes = [];
+        const form = {
+          id: 0,
+          ingredientList: $scope.ingredients.map(function(element){ return {id: element.id, name: element.name, units: element.stockAmount} })
+        }
+        found = false;
+        for(let i = 0; i < form.ingredientList.length; i++) {
+          if(form.ingredientList[i].units != 0) {
+            found = true;
+            break;
+          }
+        }
+        if(!found) {
+          $scope.submitStatus = "Not submitted: no changes made";
+          $scope.submitStatusClass = "error";
+          return;
+        }
+        $http.put("/api/v1/inventory", form).then(function(success) {
+            $scope.submitStatus = "Inventory updated successfully!\n";
+            for(let i = 0; i < form.ingredientList.length; i++) {
+              if(form.ingredientList[i].units > 0) {
+                $scope.changes.push(form.ingredientList[i].name + ":   +" + form.ingredientList[i].units);
+              }
+            }
+            $scope.submitStatusClass = "success";
+            $scope.ingredients = success.data.ingredientList;
+            for (let i = 0; i < $scope.ingredients.length; i++) {
+              $scope.ingredients[i].stockAmount = 0;
+            } 
+          }, function(rejection) {
+            $scope.submitStatus = "Failure! fields must be non-negative integers";
+            $scope.submitStatusClass = "error";
+          }
+        );
+      }
+		});
+		/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+		/*]]>*/
+  </script>
+	<h1>Add Inventory</h1>
+	
+	<!-- Table of user inputs -->
+	<table class = "center">
+	<!-- Ingredients row in table, stylistically used as a header -->
+	  <tr>
+	  	<td><strong>Ingredients</strong></td>
+	  	<td><strong>Current Stock</strong></td>
+	  	<td><strong>Add Amount:</strong></td>
+	  </tr>
+	  
+	  
+	  <tr ng-repeat="ing in ingredients">
+	    <td class ="ingredients-td">
+	  	  {{ing.name}}
+	    </td>
+	    <td class ="stock-td">
+        {{ing.units}}
+		  </td>	 
+      <td>
+		    <input type="number" ng-model="ing.stockAmount"/>
+		  </td>
+	  </tr>
+	  
+	</table>
+	
+	
+	
+	<br>
+	<br>
+	<script>
+	  function returnHome() {
+	    window.location.href = '/';
+	  }
+	</script>
+	<div>
+		<p ng-class="{'red-text': submitStatusClass === 'error', 'green-text': submitStatusClass === 'success'}">{{submitStatus}}</p>
+		<p ng-class="{'red-text': submitStatusClass === 'error', 'green-text': submitStatusClass === 'success'}" ng-repeat="change in changes">{{change}}</p>
+		<button type="button" onClick="returnHome()">Return Home</button>
+		<button type="button" ng-click="submit()">Save</button>
+	</div>
+</body>

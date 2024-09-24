@@ -1,0 +1,73 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLPackage</id><coordinates><x>550</x><y>194</y><w>530</w><h>610</h></coordinates><panel_attributes>CoffeeMaker.models
+--
+bg=none</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>580</x><y>244</y><w>440</w><h>260</h></coordinates><panel_attributes>&lt;&lt;Abstract Class&gt;&gt;
+User
+--
+-id: Long
+-userName: String
+-password: String
+/_-role: String_/
+/_-authorities: List&lt;? extends GrantedAuthority&gt;_/
+-active: boolean
+--
++getPassword() : String
++getUserName() : String
++isAccountNonExpired() : bool
++isAccountNonLocked() : bool
++isCredentialsNonExpired() : bool
++isEnabled() : bool
++editUser(user : User) : bool
+/+getRole() : String/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1150</x><y>244</y><w>380</w><h>160</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+org.springframework.security.core.userdetails::UserDetails
+--
+/+getAuthorities(void) : Collection&lt;? extends GrantedAuthority&gt;/
+/+getPassword() : String/
+/+getUserName() : String/
+/+isAccountNonExpired() : bool/
+/+isAccountNonLocked() : bool/
+/+isCredentialsNonExpired() : bool/
+/+isEnabled() : bool/</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1010</x><y>324</y><w>160</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>140;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>580</x><y>534</y><w>240</w><h>110</h></coordinates><panel_attributes>Customer
+--
+_-role: String_
+_-authorities: _
+_        List&lt;? extends GrantedAuthority&gt;_
+--
++getAuthorities(void):
+        List&lt;? extends GrantedAuthority&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>680</x><y>494</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLClass</id><coordinates><x>840</x><y>534</y><w>230</w><h>110</h></coordinates><panel_attributes>Staff
+--
+_-role: String_
+_-authorities: _
+_        List&lt;? extends GrantedAuthority&gt;_
+--
++getAuthorities(void):
+        List&lt;? extends GrantedAuthority&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>920</x><y>494</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLClass</id><coordinates><x>710</x><y>664</y><w>240</w><h>110</h></coordinates><panel_attributes>Manager
+--
+_-role: String_
+_-authorities: _
+_        List&lt;? extends GrantedAuthority&gt;_
+--
++getAuthorities(void):
+        List&lt;? extends GrantedAuthority&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>820</x><y>494</y><w>30</w><h>190</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;170</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>110</x><y>194</y><w>420</w><h>130</h></coordinates><panel_attributes>CoffeeMaker.services
+--
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>130</x><y>244</y><w>380</w><h>50</h></coordinates><panel_attributes>UserService
+--
++loadUserByUsername(userName: String) : User</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>120</x><y>94</y><w>390</w><h>70</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+org.springframework.security.core.userdetails::UserDetailsService
+--
+/+loadUserByUsername(username: String) : UserDetails/</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>154</y><w>30</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>110</x><y>344</y><w>420</w><h>130</h></coordinates><panel_attributes>CoffeeMaker.repositories
+--
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>130</x><y>384</y><w>380</w><h>60</h></coordinates><panel_attributes>UserRepository extends JPARepository&lt;User, Integer&gt;
+--
+findByUserName(userName: String) : User</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>284</y><w>120</w><h>120</h></coordinates><panel_attributes>lt=&lt;-
+-userRepository</panel_attributes><additional_attributes>10;100;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>110</x><y>584</y><w>420</w><h>180</h></coordinates><panel_attributes>CoffeeMaker.config
+--
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>130</x><y>624</y><w>380</w><h>90</h></coordinates><panel_attributes>SecurityConfig
+--
++configure(HttpSecurity http) : void
++configure(AuthenticationManagerBuilder) : void
++getPasswordEncoder(void) : PasswordEncoder</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>230</x><y>504</y><w>250</w><h>40</h></coordinates><panel_attributes>WebSecurityConfigurerAdapter 
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>300</x><y>534</y><w>30</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>Relation</id><coordinates><x>0</x><y>264</y><w>150</w><h>430</h></coordinates><panel_attributes>lt=&lt;-
+
+
+
+-userDetailsService</panel_attributes><additional_attributes>130;10;10;10;10;410;130;410</additional_attributes></element></diagram>

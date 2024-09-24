@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoffeeMaker Menu</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #FFF0E5; /* light coffee cream color for the background */
+    margin: 0;
+    padding: 20px;
+  }
+
+  .menu-header {
+    text-align: center;
+    color: #A52A2A; /* coffee color */
+    font-size: 2em;
+    margin: 0.5em 0;
+  }
+
+  .menu-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px; /* Adjust as necessary */
+    margin: auto;
+  }
+
+  .menu-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+  }
+
+  .menu-item:last-child {
+    border-bottom: none;
+  }
+
+  .item-name {
+    font-size: 1.2em;
+    color: #A52A2A; /* coffee color */
+  }
+
+  .item-description {
+    color: #333;
+    font-size: 0.9em;
+  }
+
+  .item-price {
+    font-weight: bold;
+    float: right;
+    color: #A52A2A; /* coffee color */
+  }
+
+  .menu-footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #2196F3;
+  }
+
+  .menu-footer a {
+    text-decoration: none;
+    color: #2196F3;
+  }
+
+  .menu-footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="menu-header">
+  <h1>CoffeeMaker Menu</h1>
+</div>
+
+<div class="menu-section">
+  <div class="menu-item">
+    <div class="item-name">Cappuccino</div>
+    <div class="item-description">A warm, frothy classic with a bold espresso flavor.</div>
+    <div class="item-price">$3.99</div>
+  </div>
+  <div class="menu-item">
+    <div class="item-name">Espresso</div>
+    <div class="item-description">Strong and rich in flavor, perfect for a quick boost.</div>
+    <div class="item-price">$2.99</div>
+  </div>
+  <!-- Repeat for each menu item -->
+</div>
+
+<div class="menu-footer">
+  <a href="order.html">Place Your Order</a>
+</div>
+
+<br /><br /> <a href="javascript:history.go(-1)">Home</a>
+
+</body>
+</html>

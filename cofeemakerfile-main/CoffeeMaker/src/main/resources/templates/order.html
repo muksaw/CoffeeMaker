@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" ng-app="order">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Maker</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #FFF0E5; 
+  margin: 0;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header h2:first-child {
+  flex-grow: 1; 
+  text-align: center; 
+}
+
+.header h2:last-child {
+  flex-grow: 0; 
+  text-align: right; /* this should make it top right now */
+  margin-right: 20px; 
+}
+
+.order-section {
+  background-color: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+}
+
+.coffee-item {
+  background-color: #f0f0f0; 
+  border-radius: 20px;
+  margin-bottom: 15px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coffee-name {
+  font-size: 1em;
+  color: #A52A2A; 
+}
+
+.coffee-price {
+  background-color: transparent;
+  color: #A52A2A; 
+}
+
+.add-button {
+  background-color: #DEB887; 
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.total-price {
+  font-size: 1em;
+  color: #A52A2A; 
+}
+
+.place-order-button {
+  background-color: #A52A2A; 
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1em;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+}
+
+.notification {
+  color: #A52A2A; 
+  background-color: #f8f8f8; 
+  border-radius: 20px;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none; 
+  z-index: 100;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+}
+
+.quantity-counter {
+  margin: 0 20px; 
+  color: #A52A2A; 
+}
+
+</style>
+</head>
+<body ng-app="order" ng-controller="controller">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+  <script>
+    var app = angular.module('order', []);
+    app.controller('controller', ['$scope', '$http', '$q', '$location', function($scope, $http, $q, $location) {
+      $scope.recipes = [];
+      $scope.orderTotal = 0;
+
+      $http.get("/api/v1/recipes").then(function(response) {
+        $scope.recipes = response.data;
+        for (let i = 0; i < $scope.recipes.length; i++) {
+          $scope.recipes[i].quantity = 0;
+        }
+      });
+
+      $scope.orderPlaced = false;
+
+      //functions and whatnot
+      $scope.addItem = function(recipe) {
+        let index = $scope.recipes.indexOf(recipe); // Corrected 'recipes' to '$scope.recipes'
+        if (index === -1) {
+          console.log("error, the recipe was not found in the list and cannot be added");
+          return;
+        }
+        $scope.recipes[index].quantity += 1;
+        $scope.orderTotal += $scope.recipes[index].price;
+      }
+
+      $scope.removeItem = function(recipe) {
+        let index = $scope.recipes.indexOf(recipe); // Corrected 'recipes' to '$scope.recipes'
+        if (index === -1) {
+          console.log("error, the recipe was not found in the list and cannot be added");
+          return;
+        }
+        if($scope.recipes[index].quantity) {
+          $scope.orderTotal = Math.max(0, $scope.orderTotal - $scope.recipes[index].price); //floating point uncertainty
+        }
+        $scope.recipes[index].quantity = Math.max(0, $scope.recipes[index].quantity - 1);
+        
+      }
+
+      $scope.submitOrder = function() {
+        if($scope.orderPlaced) {
+          alert("order failed");
+          return;
+        }
+        let contents = new Map();
+        for(let i = 0; i < $scope.recipes.length; i++) {
+          if($scope.recipes[i].quantity > 0) {
+            contents.set($scope.recipes[i].name, $scope.recipes[i].quantity);
+          }
+        }
+        const obj = Object.fromEntries(contents);
+        $http.post("/api/v1/orders", obj).then(
+          function(success) {
+            $scope.orderPlaced = true;
+            //returns order number, which is used for getting the tracker page
+            $scope.orderNumber = success.data.orderNumber;
+          }, function(rejection) {
+            $scope.orderPlaced = false;
+            alert("Order failed!");
+          }
+        );
+        $scope.trackOrder = function() {
+          if($scope.orderNumber === null || typeof $scope.orderNumber === 'undefined') {
+            return;
+          }
+          //hand off the order number to orderstatus page. Orderstatus gets this parameter
+          //and makes a get request for the order using it.
+         window.location.href = 'orderstatus?orderNumber=' + $scope.orderNumber;
+        }
+      }
+    }]);
+  </script>
+<div class="header">
+  <h2>Place An Order</h2>
+  <h2>Coffee Maker</h2>
+</div>
+
+<div class="order-section">
+  <div class="coffee-item" ng-repeat="recipe in recipes">
+    <span class="coffee-name">{{recipe.name}}</span>
+    <span class="coffee-price">${{recipe.price}}</span>
+    <div class="button-group">
+      <button class="add-button" ng-click="removeItem(recipe)"> - </button>
+      <span class="quantity-counter">{{recipe.quantity}}</span>
+      <button class="add-button" ng-click="addItem(recipe)"> + </button>
+    </div>
+  </div>
+  <!-- Order Total display -->
+  <div class="order-total">
+    <span>Total:</span>
+    <span class="total-price">${{orderTotal.toFixed(2)}}</span>
+  </div>
+</div>
+
+<div ng-if="orderPlaced" >
+  <h2><span>Order placed sucessfully!</span></h2>
+  <button class="place-order-button" ng-click="trackOrder()">Track your order</button>
+</div>
+<button class="place-order-button" ng-click="submitOrder()" ng-disabled="orderPlaced">Place Order</button>
+
+<br /><br /> <a href="javascript:history.go(-1)">Home</a>
+</body>
+</html>

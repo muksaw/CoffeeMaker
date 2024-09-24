@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html ng-app="customerApp">
+<head>
+    <title>Coffee Maker - Create Account</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script>
+        angular.module('customerApp', [])
+            .controller('CustomerController', function($scope, $http) {
+            	$scope.userName = '';
+            	$scope.password = '';
+
+                $scope.submitForm = function() {
+                	$scope.user = {
+                			userName: $scope.userName,
+                			password: $scope.password
+                	}
+                	
+                    // Post the data to the endpoint
+                    $http.post('/api/v1/users/customer', $scope.user)
+                        .then(function(response) {
+                            // Handle success
+                            console.log('Customer created successfully', response);
+                            $scope.user = {}; // Reset the form
+                            returnHome();
+                            // Optionally show a success message or redirect
+                        }, function(error) {
+                            // Handle error
+                            console.error('Error creating customer', error);
+                        });
+                };
+            });
+    </script>
+    <script>
+    function returnHome() {
+       window.location.href = '/login.html';
+    }
+    </script>
+</head>
+<body ng-controller="CustomerController">
+
+<div class="container">
+    <h1>Coffee Maker</h1>
+    <h2>Create Account</h2>
+
+    <form ng-submit="submitForm()">
+        <label for="username">Username:</label>
+        <input type="text" id="userName" ng-model="userName" placeholder="Enter username" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" ng-model="password" placeholder="Enter new password" required>
+        
+        <input type="submit" value="Submit">
+    </form>
+    <button type="button" onClick="returnHome()">Return Home</button>
+</div>
+
+</body>
+</html>

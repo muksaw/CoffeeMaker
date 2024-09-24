@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>View Recipes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="css/bootstrap.css" />
+<link rel="stylesheet" href="css/app.css" />
+</head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<body>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+			
+		/*
+		* LIST OF ORDERS FOR FULFILLEMENT HERE
+		* Select an order from the list, then fulfill it
+		* This will remove it from the list of incomplete orders, and it will update the database
+		* to remove the correct number of ingredients 
+		* We may need to remove the price bit of this page
+		*/
+			
+		var app = angular.module('myApp', []);
+		app.controller('recipesCtrl', function($scope, $http, $q) {
+			$scope.selectedOrder = {};
+		    $scope.pending = [];
+
+		    $http.get("/api/v1/recipes").then(function(response) {
+		        $scope.recipes = response.data;
+		    });
+
+			$http.get("/api/v1/orders?status=open").then(function(response) {
+				$scope.pending = response.data;
+				for(let j = 0; j < $scope.pending.length; j++) {
+					$scope.pending[j].multiplicity = new Map();
+					//this is a bit crazy,
+					//essentially map recipe names to number of times the recipe occurs
+					for(let i = 0; i < $scope.pending[j].recipes.length; i++) {
+						if($scope.pending[j].multiplicity.has($scope.pending[j].recipes[i].name)) {
+							$scope.pending[j].multiplicity.set($scope.pending[j].recipes[i].name, $scope.pending[j].multiplicity.get($scope.pending[j].recipes[i].name) + 1);
+						} else {
+							$scope.pending[j].multiplicity.set($scope.pending[j].recipes[i].name, 1);
+						}
+					}
+					console.log($scope.pending[j].multiplicity);
+					$scope.pending[j].mul = [...$scope.pending[j].multiplicity.entries()].map(([name, amount]) => ({ name, amount }));
+					console.log($scope.pending[j].mul);
+				}
+
+				
+			});
+			
+			// Function to check for low inventory, Arsalaan's domain
+	        $scope.checkLowInventory = function() {
+				
+	        	$scope.lowInventoryMessage = ""; // Reset message each time
+	            $scope.IngredientNames = "";
+	            
+	        	$http.get("/api/v1/inventory/").then(function(response) {
+	        		$scope.ingredients = response.data.ingredientList;
+	                for(var i = 0;i < response.data.ingredientList.length;i++ ) {
+	                	if($scope.ingredients[i].units <= 10) {
+	                		$scope.ingredientNames += ($scope.ingredients[i].name + ", ")
+	                		if($scope.IngredientNames.length > 0) {
+                   				$scope.IngredientNames += ", ";
+                			}
+	                		$scope.IngredientNames += $scope.ingredients[i].name;
+	                	}
+	                }
+	                
+	                if($scope.IngredientNames.length > 0) {
+	                	$scope.lowInventoryMessage = "Low inventory for: " + $scope.IngredientNames;
+	                }
+	            });
+        	};
+
+
+			$scope.make = function() {
+				var amtPaid = $scope.amtPaid;
+				$scope.submissionFailure = false;
+				$scope.submissionSuccess = false;
+
+				$scope.checkLowInventory();
+				console.log($scope.selectedOrder);
+				$http.put("/api/v1/orders/" + $scope.selectedOrder.id, amtPaid).then(
+						function(success) {
+							$scope.change = success.data.message;
+							$scope.submissionSuccess = true;
+							$scope.pending = $scope.pending.filter(order => order.id != $scope.selectedOrder.id);
+							$scope.apply();
+
+						}, function(errResponse) {
+							console.log(errResponse);
+							$scope.submissionFailure = true;
+							$scope.error = errResponse.data.message;
+						});
+
+			}
+			$scope.select = function(order) {
+				$scope.selectedOrder = order;
+			}
+		});
+
+		/*]]>*/
+	</script>
+
+	<div layout:fragment="content" class="generic-container ng-cloak"
+		ng-app="myApp" ng-controller="recipesCtrl">
+		<h2>Pending Coffee Orders</h2>
+        <form>
+            <ul>
+                <li ng-repeat="order in pending">
+                    <label>
+                        <input type="radio" name="selectedOrder" ng-click="select(order)" ng-value="order">
+                        	<span>Order #{{order.orderNumber}}: {{order.userName}} - </span>
+							<span ng-repeat="x in order.mul">{{x.name}}: ({{x.amount}}) </span>
+                    </label>
+                </li>
+            </ul>
+        </form>
+
+		<br /> 
+		
+		<label for="amtPaid">Enter payment</label> 
+		<input type="text" ng-model="amtPaid" name="amtPaid" required="true" /> 
+
+		<br /> 
+
+		<input type="submit" ng-click="make()" value="Make Coffee" class="btn btn-primary btn-sm" /> 
+
+		<br />
+
+		<div ng-show="submissionSuccess" class="success">Order {{selectedOrder.orderNumber}} was made. Your change is {{change}}.</div>
+		<div ng-show="submissionFailure">An error occurred: {{error}}</div>
+
+		<div ng-show="lowInventoryMessage" class="alert alert-warning"> {{lowInventoryMessage}} </div>
+
+		<br /> <a href="/index">Home</a>
+	</div>
+</body>
+</html>

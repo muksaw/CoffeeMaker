@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Welcome to the CSC326 CoffeeMaker</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #FFF0E5; 
+    margin: 0;
+    padding: 20px;
+    text-align: center; 
+  }
+
+  h1 {
+    color: #A52A2A; 
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    color: #A52A2A;
+    margin-bottom: 1em;
+  }
+
+  ul {
+    list-style-type: none; 
+    padding: 0;
+    max-width: 200px; 
+    margin: auto; 
+  }
+
+  li {
+    background-color: #fff;
+    margin: 10px 0; 
+    border: 1px solid #A52A2A; 
+    border-radius: 5px; 
+  }
+
+  a {
+    color: #A52A2A; 
+    padding: 10px 15px;
+    display: block; 
+    text-decoration: none; 
+    transition: background-color 0.3s ease; 
+  }
+
+  a:hover {
+    background-color: #f7f7f7; 
+  }
+
+  form {
+    margin-top: 20px; 
+  }
+
+  button {
+    background-color: #A52A2A; 
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; 
+  }
+
+  button:hover {
+    background-color: #8B4513; 
+  }
+</style>
+</head>
+<body>
+  <h1>Coffee Maker</h1>
+  <h2>Customer Homepage</h2>
+  <ul>
+    <li><a href="order.html">Place an Order</a></li>
+    <li><a href="menu.html">View Menu</a></li>
+    <li><a href="orderstatus.html">View Order Status</a></li>
+    <li><a href="accountinfo.html">Edit Account Information</a></li>
+  </ul>
+
+  <!-- Logout button -->
+  <form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+  </form>
+
+</body>
+</html>

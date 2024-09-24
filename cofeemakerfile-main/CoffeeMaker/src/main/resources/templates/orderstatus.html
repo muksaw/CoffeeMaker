@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f2; 
+  margin: 0;
+  padding: 20px;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between; 
+  margin-bottom: 20px;
+}
+
+.orders-header h2:first-child {
+  flex-grow: 1;
+  text-align: center; 
+}
+
+.orders-header h2:last-child {
+  flex-grow: 0;
+  text-align: right; 
+  margin-right: 20px; 
+  font-size: 1.5em;
+  color: #A52A2A; 
+}
+
+.orders-section {
+  background-color: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-id {
+  font-size: 18px;
+  color: #333;
+}
+
+.status {
+  font-size: 18px;
+  color: #4CAF50; 
+}
+
+.status.in-progress {
+  color: #FF9800;
+}
+
+.back-button {
+  display: inline-block;
+  margin-top: 20px;
+  color: #2196F3;
+  cursor: pointer;
+  text-decoration: underline; 
+}
+.pick-up-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body ng-app="orderstatus", ng-controller="controller">
+  <script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+  <script>
+    
+    /* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+    /*<![CDATA[*/ 
+    var app = angular.module('orderstatus', []);
+    app.controller('controller', ['$scope', '$http', '$q', '$location', function($scope, $http, $q, $location) {
+      
+      //functions
+      //long polls the endpoint until the order is ready. the server could take an arbitrarily long time to respond
+      $scope.longPoll = function(index) {
+        let orderNumber = $scope.orders[index].orderNumber;
+        console.log('sending');
+        $http.get('/api/v1/orders/status/' + orderNumber).then(
+          function(success) {
+            if(success.data.ready) {
+              $scope.orders[index].ready = success.data.ready;
+              return;
+            } 
+            setTimeout($scope.longPoll, 5000, index); //retry after 5 seconds.
+          }, function(failure) {
+            setTimeout($scope.longPoll, 5000, index); //retry after 5 seconds.
+          }
+        )
+      }
+
+      $scope.checkOrderStatus = function() {
+        for(let i = 0; i < $scope.orders.length; i++) {
+          console.log($scope.orders[i]);
+          if(!$scope.orders[i].ready) {
+            $scope.longPoll(i);
+          }
+        }
+      }
+
+      $scope.getUrlParams = function() {
+        let params = {};
+        let paramKVPairs = window.location.search.substring(1).split('&');
+        for (let i = 0; i < paramKVPairs.length; i++) {
+            let pair = paramKVPairs[i].split('=');
+            params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+        return params;
+      }
+      //stuff that runs on page-load starts here
+      $scope.orderNumber = $scope.getUrlParams().orderNumber;
+      $scope.orders = [];
+      console.log($scope.orderNumber);
+      console.log(typeof $scope.orderNumber);
+      if(typeof $scope.orderNumber === "undefined") {
+        $http.get('/api/v1/orders').then(
+          function(success) {
+            $scope.orders = success.data;
+            $scope.checkOrderStatus();
+          }
+        )
+      } else {
+        //get this order
+        $http.get('/api/v1/orders/' + $scope.orderNumber).then(
+          function(success) {
+            $scope.orders.push(success.data);
+            $scope.checkOrderStatus();
+          }, function(failure) {
+            //order not found, do nothing I guess?
+          }
+        )
+      }
+      
+      $scope.pickUp = function(index) {
+        $scope.orders[index].active = false;
+        $http.put('/api/v1/orders/' + $scope.orders[index].id).then(
+          function(success) {
+            $scope.orders.splice(index, 1);
+            $scope.apply();
+            alert("Order Picked Up!");
+          }, function(failure) {
+            //do nothing.
+          }
+        );
+      }
+
+    }]);
+  </script>
+
+<div class="orders-header">
+  <h2>Orders</h2>
+</div>
+
+<!-- This section needs to hold current orders, and whether they're ready or not. -->
+<div class="orders-section">
+  <div class="order-item" ng-repeat="order in orders">
+    <span class="order-id">{{order.orderNumber}}</span>
+    <span ng-class="{'status': order.ready, 'status in-progress': !(order.ready)}">
+      {{order.ready ? (order.active ? 'Ready ' : 'Picked up') : 'In Progress'}} <button class="pick-up-button" ng-click="pickUp($index)" ng-if="order.ready && order.active">
+        Pick Up
+      </button>
+    </span>
+  </div>
+</div>
+
+<br /><br /> <a href="/index">Home</a>
+
+</body>
+</html>
